@@ -1,7 +1,10 @@
 use crate::types::{Status, TODOData};
+use directories::ProjectDirs;
 use rusqlite::{Connection, Result as RusqliteResult};
 use std::error::Error;
 use std::fmt;
+use std::fs;
+use std::path::PathBuf;
 
 #[derive(Debug)]
 pub enum DatabaseError {
@@ -27,8 +30,19 @@ pub struct DatabaseManager {
 }
 
 impl DatabaseManager {
+    fn default_db_path() -> PathBuf {
+        if let Some(proj_dirs) = ProjectDirs::from("", "", "tuitask") {
+            let data_dir = proj_dirs.data_dir();
+            let _ = fs::create_dir_all(data_dir);
+            data_dir.join("data.db")
+        } else {
+            PathBuf::from("data.db")
+        }
+    }
+
     pub fn new() -> Result<Self, DatabaseError> {
-        let connection = match Self::open_sqlite_con("data.db") {
+        let db_path = Self::default_db_path();
+        let connection = match Self::open_sqlite_con(&db_path) {
             Ok(conn) => {
                 // Create the todos table if it doesn't exist
                 if let Err(e) = conn.execute(
@@ -59,8 +73,8 @@ impl DatabaseManager {
         Ok(DatabaseManager { connection })
     }
 
-    fn open_sqlite_con(db_name: &str) -> RusqliteResult<Connection> {
-        Connection::open(db_name)
+    fn open_sqlite_con(db_path: impl AsRef<std::path::Path>) -> RusqliteResult<Connection> {
+        Connection::open(db_path)
     }
 
     pub fn get_connection(&self) -> Option<&Connection> {
