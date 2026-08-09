@@ -20,7 +20,7 @@ reqwest = { version = "0.12", default-features = false, features = ["json", "rus
 serde = { version = "1", features = ["derive"] }
 dotenvy = "0.15.7"
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
-rusqlite = { version = "0.37.0", features = ["bundled"] }
+rusqlite = { version = "0.38.0", features = ["bundled"] }
 
 [[bin]]
 name = "tuitask"
